@@ -1,36 +1,53 @@
-import { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { supabase } from '../lib/supabase';
-
+import { useState } from "react";
+import { useNavigate } from "react-router-dom";
+import { supabase } from "../lib/supabase";
+import { postToJobBoards } from "../../../agents/agents/jobPoster/jobPoster";
+import { ingestCv } from "../../../agents/agents/cvingester/cvingester";
 
 export default function AddJob() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
   const [formData, setFormData] = useState({
-    title: '',
-    department: '',
-    location: '',
-    salary_range: '',
-    description: '',
+    title: "",
+    department: "",
+    location: "",
+    salary_range: "",
+    description: "",
   });
 
-  const handleSubmit = async (status: 'Draft' | 'Published') => {
+  const handleSubmit = async (status: "Draft" | "Published") => {
     setLoading(true);
     try {
-      const { error } = await supabase.from('jobs').insert([
-        {
-          ...formData,
-          status,
-        },
-      ]);
+      // Step 1: Insert job into Supabase
+      const { data, error } = await supabase
+        .from("jobs")
+        .insert([{ ...formData, status }])
+        .select();
 
       if (error) throw error;
 
+      const jobId = data?.[0]?.id;
+
+      // Step 2: If Published, trigger external posting + CV ingestion
+      if (status === "Published" && jobId) {
+        await postToJobBoards({
+          id: jobId,
+          ...formData,
+          status,
+        });
+
+        // Simulate CV ingestion (runs all agents: parse, standardize, enrich, compliance, score)
+        await ingestCv(jobId, { name: "Jane Doe", role: "Software Engineer" });
+        await ingestCv(jobId, { name: "John Smith", role: "Frontend Developer" });
+
+        console.log("Automation pipeline triggered: job posted + CVs ingested.");
+      }
+
       // ✅ Navigate back to jobs list after success
-      navigate('/jobs');
+      navigate("/jobs");
     } catch (error) {
-      console.error('Error creating job:', error);
-      alert('Failed to create job. Please try again.');
+      console.error("Error creating job:", error);
+      alert("Failed to create job. Please try again.");
     } finally {
       setLoading(false);
     }
@@ -156,19 +173,19 @@ export default function AddJob() {
           <div className="flex gap-4">
             <button
               type="button"
-              onClick={() => handleSubmit('Draft')}
+              onClick={() => handleSubmit("Draft")}
               disabled={loading}
               className="flex-1 px-6 py-3 bg-gray-100 text-gray-700 rounded-lg font-medium hover:bg-gray-200 transition disabled:opacity-50"
             >
-              {loading ? 'Saving...' : 'Save Draft'}
+              {loading ? "Saving..." : "Save Draft"}
             </button>
             <button
               type="button"
-              onClick={() => handleSubmit('Published')}
+              onClick={() => handleSubmit("Published")}
               disabled={loading}
               className="flex-1 px-6 py-3 bg-green-600 text-white rounded-lg font-medium hover:bg-green-700 transition disabled:opacity-50"
             >
-              {loading ? 'Publishing...' : 'Publish Job'}
+              {loading ? "Publishing..." : "Publish Job"}
             </button>
           </div>
         </form>

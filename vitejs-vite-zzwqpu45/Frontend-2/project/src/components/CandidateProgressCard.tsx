@@ -9,6 +9,7 @@ type Props = {
   role: string;
   offer_status: "draft" | "sent" | "accepted" | "onboarding" | "declined";
   onboarding_status: "pending" | "complete" | "n/a";
+  refresh?: () => void; // 👈 allows parent list to re-fetch
 };
 
 const STAGES = [
@@ -43,6 +44,7 @@ export default function CandidateProgressCard({
   role,
   offer_status,
   onboarding_status,
+  refresh,
 }: Props) {
   const [localComplete, setLocalComplete] = useState(false);
 
@@ -54,15 +56,21 @@ export default function CandidateProgressCard({
   const isComplete = stageIndex >= 4;
 
   async function handleComplete() {
-    setLocalComplete(true);
-    await overrideStep(id, "onboarding", "complete");
+    try {
+      setLocalComplete(true);
+      await overrideStep(id, "onboarding", "complete");
+      if (refresh) refresh(); // 👈 trigger parent refresh
+    } catch (err) {
+      console.error("Automation failed:", err);
+      setLocalComplete(false);
+    }
   }
 
   return (
     <motion.div
-      className="bg-white rounded-[25px] shadow-sm border border-gray-200 p-6 w-full
-                 transform transition-transform duration-300
-                 hover:scale-125 hover:shadow-lg hover:z-10"
+      className={`bg-white rounded-[25px] shadow-sm border border-gray-200 p-6 w-full
+                  transform transition-transform duration-300
+                  ${isComplete ? "opacity-70 hover:scale-105" : "hover:scale-125 hover:shadow-lg hover:z-10"}`}
       layout
       initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
@@ -84,27 +92,31 @@ export default function CandidateProgressCard({
         )}
       </div>
 
-      {/* Gauge container (no border radius, no overflow-hidden) */}
+      {/* Gauge */}
       <div
         className={`relative h-6 w-full ${
           isComplete ? "border-transparent" : "border border-gray-200"
         }`}
       >
         <motion.div
-          className="absolute inset-0 flex"
+          className="absolute inset-0 flex gap-x-1"
           style={{ transformOrigin: "center" }}
           initial={{ scaleX: 1, opacity: 1 }}
           animate={{ scaleX: isComplete ? 0 : 1, opacity: isComplete ? 0 : 1 }}
-          transition={{ duration: 1.2, ease: "easeInOut" }}
+          transition={{ delay: 0.1, duration: 1.2, ease: "easeInOut" }}
         >
           {isComplete ? (
-            <div className="w-full h-full bg-green-600" />
+            <div className="w-full h-full bg-green-600 rounded-full" />
           ) : (
             STAGES.map((stage, i) => {
               const filled = i + 1 <= stageIndex;
               return (
                 <div key={stage.key} className="flex-1">
-                  <div className={`h-full ${filled ? stage.color : "bg-gray-200"}`} />
+                  <div
+                    className={`h-full rounded-sm ${
+                      filled ? stage.color : "bg-gray-200"
+                    }`}
+                  />
                 </div>
               );
             })
@@ -119,7 +131,7 @@ export default function CandidateProgressCard({
             opacity: isComplete ? 1 : 0,
             scale: isComplete ? 1 : 0.6,
           }}
-          transition={{ delay: 0.8, duration: 0.4, ease: "easeOut" }}
+          transition={{ delay: 0.85, duration: 0.55, ease: "easeOut" }}
         >
           <div className="h-8 w-8 rounded-full bg-green-600 flex items-center justify-center shadow">
             <CheckCircle className="h-6 w-6 text-white" />
@@ -145,7 +157,10 @@ export default function CandidateProgressCard({
               ? "text-black"
               : "text-gray-300";
             return (
-              <div key={stage.key} className={`text-xs font-medium ${colorClass} text-center`}>
+              <div
+                key={stage.key}
+                className={`text-xs font-medium ${colorClass} text-center`}
+              >
                 {stage.label}
               </div>
             );

@@ -1,11 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
-import { FileText } from "lucide-react";
-import { Sparkles } from "lucide-react";
-import { CircleCheckBig } from "lucide-react";
-
-
-
+import { FileText, Sparkles, CheckCircle } from "lucide-react";
 
 interface CandidateRecord {
   id: string;
@@ -57,7 +52,6 @@ export default function TopCandidatesSection() {
 
   return (
     <section className="mt-10 w-full">
-      {/* TOP 3 CANDIDATES */}
       <h2 className="text-2xl font-bold text-gray-900 mb-6">Top 3 Candidates</h2>
 
       <div className="grid grid-cols-[repeat(3,minmax(0,1fr))] gap-8">
@@ -73,24 +67,31 @@ export default function TopCandidatesSection() {
           return (
             <div
               key={c.id}
-              className="relative border border-gray-200 rounded-xl p-8 bg-white shadow-sm hover:shadow-md transition min-h-[240px]"
+              className="border border-gray-200 rounded-xl p-8 bg-white shadow-sm hover:shadow-md transition min-h-[260px]"
             >
-              {/* SCORE */}
-              <div className="absolute top-4 right-4 px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-md">
-                {score}
+              {/* IMAGE + NAME + SCORE ROW */}
+              <div className="flex items-start justify-between mb-4">
+                
+                {/* LEFT SIDE: IMAGE ABOVE NAME */}
+                <div className="flex flex-col items-start">
+                  {c.profile_image_url && (
+                    <img
+                      src={c.profile_image_url}
+                      alt={c.name}
+                      className="w-16 h-16 rounded-full object-cover mb-2"
+                    />
+                  )}
+
+                  <h3 className="text-lg font-semibold text-gray-900 text-center">
+                    {c.name}
+                  </h3>
+                </div>
+
+                {/* RIGHT SIDE: SCORE BADGE */}
+                <div className="px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-md">
+                  {score}
+                </div>
               </div>
-
-              {/* IMAGE — CIRCULAR */}
-              {c.profile_image_url && (
-                <img
-                  src={c.profile_image_url}
-                  alt={c.name}
-                  className="w-16 h-16 rounded-full object-cover mb-4"
-                />
-              )}
-
-              {/* NAME */}
-              <h3 className="text-lg font-semibold text-gray-900">{c.name}</h3>
 
               {/* BULLETS */}
               <ul className="mt-3 space-y-2 text-sm text-gray-700">
@@ -101,11 +102,10 @@ export default function TopCandidatesSection() {
 
               {/* REFERENCE CHECK */}
               {c.reference_check_passed && (
-               <span className="mt-4 inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full border border-green-300">
-  <CircleCheckBig className="w-4 h-4" />
-  Reference Check Passed
-</span>
-
+                <span className="mt-4 inline-flex items-center gap-1 px-3 py-1 bg-green-100 text-green-700 text-xs font-medium rounded-full border border-green-300">
+                  <CheckCircle className="w-4 h-4" />
+                  Reference Check Passed
+                </span>
               )}
 
               {/* TRANSCRIPT */}
@@ -115,11 +115,9 @@ export default function TopCandidatesSection() {
                   target="_blank"
                   rel="noopener noreferrer"
                   className="mt-2 text-blue-600 text-sm underline hover:text-blue-800 flex items-center gap-1"
-
                 >
                   <FileText className="w-4 h-4" />
-
-                  View Interview Transcript
+                  <strong>View Interview Transcript</strong>
                 </a>
               )}
             </div>
@@ -129,17 +127,12 @@ export default function TopCandidatesSection() {
 
       {/* AI TOP PICK */}
       <div className="mt-12 border border-gray-200 rounded-xl p-8 bg-gray-50 shadow-sm">
-        {/* TITLE + ICON ABOVE IMAGE */}
-
         <div className="flex items-center gap-2 mb-6">
-          {/* ICON PLACEHOLDER — replace with your SVG */}
           <Sparkles className="w-5 h-5 text-green-500" />
-
           <h3 className="text-xl font-semibold text-gray-900">AI's Top Pick</h3>
         </div>
 
         <div className="flex items-start gap-8">
-          {/* IMAGE — SQUARE */}
           {aiTopPick.profile_image_url && (
             <div className="flex-shrink-0">
               <img
@@ -150,7 +143,6 @@ export default function TopCandidatesSection() {
             </div>
           )}
 
-          {/* DETAILS */}
           <div className="flex-1">
             <p className="text-lg font-semibold text-gray-900">{aiTopPick.name}</p>
 
@@ -158,7 +150,6 @@ export default function TopCandidatesSection() {
               Score: {aiTopPick.post_interview_score}
             </div>
 
-            {/* AI ANALYSIS */}
             {aiTopPick.ai_analysis ? (
               <p className="mt-4 text-sm text-gray-700 leading-relaxed">
                 {aiTopPick.ai_analysis}

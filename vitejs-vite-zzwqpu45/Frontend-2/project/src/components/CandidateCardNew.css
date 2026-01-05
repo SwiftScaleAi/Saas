@@ -2,241 +2,165 @@
   background: #ffffff;
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  margin-bottom: 20px;
-  width: 100%;
-}
-
-/* HEADER */
-.candidate-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.candidate-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.candidate-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.candidate-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.candidate-role {
-  font-size: 0.9rem;
-  color: #555;
-  margin: 0;
-}
-
-/* SCORE */
-.candidate-score {
-  text-align: right;
-}
-
-.score-number {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #2e7d32;
-}
-
-.score-delta {
-  display: block;
-  font-size: 0.85rem;
-  margin-top: 2px;
-}
-
-.score-delta.up {
-  color: #2e7d32;
-}
-
-.score-delta.down {
-  color: #c62828;
-}
-
-/* HIGHLIGHTS */
-.candidate-highlights {
-  margin-top: 12px;
-  padding-left: 0;
-  list-style: none;
-}
-
-.highlight-item {
-  font-size: 0.9rem;
-  margin-bottom: 6px;
-}
-
-/* FOOTER */
-.candidate-footer {
-  margin-top: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.reference-badge {
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.badge-icon {
-  font-size: 1rem;
-}
-
-.transcript-link {
-  color: #1976d2;
-  text-decoration: underline;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.transcript-icon {
-  font-size: 1rem;
-}
-.candidate-card-new {
-  background: #ffffff;
-  border-radius: 12px;
-  padding: 20px;
-  box-shadow: 0 4px 12px rgba(0,0,0,0.08);
-  margin-bottom: 20px;
-  width: 100%;
-}
-
-/* HEADER */
-.candidate-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-.candidate-info {
-  display: flex;
-  align-items: center;
-  gap: 12px;
-}
-
-.candidate-avatar {
-  width: 48px;
-  height: 48px;
-  border-radius: 50%;
-  object-fit: cover;
-}
-
-.candidate-name {
-  font-size: 1.1rem;
-  font-weight: 600;
-  margin: 0;
-}
-
-.candidate-role {
-  font-size: 0.9rem;
-  color: #555;
-  margin: 0;
-}
-
-/* SCORE */
-.candidate-score {
-  text-align: right;
-}
-
-.score-number {
-  font-size: 1.4rem;
-  font-weight: 700;
-  color: #2e7d32;
-}
-
-.score-delta {
-  display: block;
-  font-size: 0.85rem;
-  margin-top: 2px;
-}
-
-.score-delta.up {
-  color: #2e7d32;
-}
-
-.score-delta.down {
-  color: #c62828;
-}
-
-/* HIGHLIGHTS */
-.candidate-highlights {
-  margin-top: 12px;
-  padding-left: 0;
-  list-style: none;
-}
-
-.highlight-item {
-  font-size: 0.9rem;
-  margin-bottom: 6px;
-}
-
-/* FOOTER */
-.candidate-footer {
-  margin-top: 14px;
-  display: flex;
-  flex-direction: column;
-  gap: 6px;
-}
-
-.reference-badge {
-  background: #e8f5e9;
-  color: #2e7d32;
-  padding: 6px 10px;
-  border-radius: 6px;
-  font-weight: 600;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.badge-icon {
-  font-size: 1rem;
-}
-
-.transcript-link {
-  color: #1976d2;
-  text-decoration: underline;
-  font-size: 0.9rem;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-}
-
-.transcript-icon {
-  font-size: 1rem;
-}
-
-
-
-.ai-reasoning-box {
-  background: #f9fafb;
-  padding: 16px;
-  border-radius: 10px;
-  margin-top: 12px;
   border: 1px solid #e5e7eb;
+  box-shadow: 0 4px 10px rgba(15, 23, 42, 0.04);
+  width: 100%;
+  transition: box-shadow 0.2s ease, transform 0.2s ease, border-color 0.2s ease;
 }
 
-.ai-reasoning-text {
-  font-size: 0.95rem;
+.candidate-card-new:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.08);
+  border-color: #d1d5db;
+}
+
+.ai-glow {
+  box-shadow: 0 0 18px rgba(0, 200, 0, 0.25);
+}
+
+.candidate-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.candidate-info {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.candidate-avatar {
+  width: 52px;
+  height: 52px;
+  border-radius: 50%;
+  object-fit: cover;
+}
+
+.candidate-name {
+  font-size: 1.15rem;
+  font-weight: 600;
+  margin: 0;
+}
+
+.candidate-role {
+  font-size: 0.9rem;
+  color: #666;
+  margin: 0;
+}
+
+.candidate-score {
+  text-align: right;
+}
+
+.score-number {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: #111827;
+}
+
+.score-delta {
+  font-size: 0.75rem;
+  font-weight: 500;
+  vertical-align: super;
+  margin-left: 4px;
+  opacity: 0.85;
+  color: #16a34a;
+}
+
+.score-delta.down {
+  color: #dc2626;
+}
+
+.candidate-highlights {
+  margin-top: 14px;
+  padding-left: 0;
+  list-style: none;
+}
+
+.highlight-item {
+  font-size: 0.92rem;
+  margin-bottom: 6px;
   color: #444;
-  line-height: 1.5;
+}
+
+.candidate-footer {
+  margin-top: 16px;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.reference-badge {
+  background: #e8f5e9;
+  color: #2e7d32;
+  padding: 6px 10px;
+  border-radius: 6px;
+  font-weight: 600;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.badge-icon {
+  font-size: 1rem;
+}
+
+.transcript-link {
+  color: #2563eb;
+  text-decoration: underline;
+  font-size: 0.85rem;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.transcript-icon {
+  font-size: 1rem;
+}
+
+.action-buttons {
+  margin-top: 18px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.action-btn {
+  padding: 7px 14px;
+  font-size: 0.8rem;
+  border-radius: 999px;
+  border: 1px solid #e5e7eb;
+  background: #f9fafb;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, transform 0.1s ease;
+  font-weight: 500;
+}
+
+.action-btn.reference {
+  background: #16a34a;
+  border-color: #16a34a;
+  color: #ffffff;
+}
+
+.action-btn.offer {
+  background: #2563eb;
+  border-color: #2563eb;
+  color: #ffffff;
+}
+
+.action-btn.onboarding {
+  background: #f3f4f6;
+  border-color: #d1d5db;
+  color: #111827;
+}
+
+.action-btn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  filter: brightness(1.03);
+}
+
+.action-btn:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
 }

@@ -1,18 +1,27 @@
 import { useEffect, useState } from "react";
 import { supabase } from "../lib/supabase";
 import { callEdgeFunction } from "../utils/edgeFunctions";
-
+import CandidateCardNew from "../components/CandidateCardNew";
 
 interface Candidate {
   id: string;
   name: string;
   role: string;
+  company: string;
+  years_experience: number;
+
   pre_interview_score: number;
   post_interview_score: number;
-  rating: string;
+
+  highlights: string[] | null;
+
   reference_status: string;
-  reference_source: string;
   reference_locked: boolean;
+
+  transcript_url: string | null;
+  profile_image_url: string | null;
+  cv_file_path?: string;
+
   offer_status: string;
   onboarding_status: string;
 }
@@ -20,6 +29,7 @@ interface Candidate {
 export default function Candidates() {
   const [candidates, setCandidates] = useState<Candidate[]>([]);
   const [loading, setLoading] = useState(true);
+
   const [buttonState, setButtonState] = useState<
     Record<string, { sending: boolean; sent: boolean }>
   >({});
@@ -27,7 +37,6 @@ export default function Candidates() {
   useEffect(() => {
     fetchData();
 
-    // 🔄 realtime subscription
     const channel = supabase
       .channel("candidates-changes")
       .on(
@@ -91,92 +100,56 @@ export default function Candidates() {
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {candidates.map((candidate) => (
-            <div
-              key={candidate.id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:-translate-y-[1px] hover:shadow-md hover:border-gray-300
-"
-            >
-              <h3 className="font-bold text-gray-900">{candidate.name}</h3>
-              <p className="text-sm text-gray-600">{candidate.role}</p>
+          {candidates.map((c) => {
+            const score = c.post_interview_score ?? c.pre_interview_score ?? 0;
+            const delta =
+              c.post_interview_score && c.pre_interview_score
+                ? c.post_interview_score - c.pre_interview_score
+                : undefined;
 
-              <div className="flex gap-2 mt-4 mb-4">
-                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-lg bg-green-100 text-green-800">
-                  Pre: {candidate.pre_interview_score ?? "-"}
-                </span>
-                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-lg bg-blue-100 text-blue-800">
-                  Post: {candidate.post_interview_score ?? "-"}
-                </span>
-                <span className="inline-block px-3 py-1 text-xs font-semibold rounded-lg bg-gray-100 text-gray-800">
-                  Rating: {candidate.rating}
-                </span>
-              </div>
+            const cvUrl = c.cv_file_path
+              ? supabase.storage.from("cvs").getPublicUrl(c.cv_file_path).data
+                  .publicUrl
+              : undefined;
 
-              <div className="space-y-1 text-sm mb-4">
-                <p>Reference: {candidate.reference_status}</p>
-                <p>Offer: {candidate.offer_status}</p>
-                <p>Onboarding: {candidate.onboarding_status}</p>
-              </div>
-
-             <div className="mt-4 flex gap-2">
-  {/* ✅ Reference Check */}
-  <button
-    onClick={async () => {
-      setButton(candidate.id, "reference", true, false);
-      await callEdgeFunction(candidate.id, "reference", "passed");
-      setButton(candidate.id, "reference", false, true);
-    }}
-    disabled={
-      buttonState[`${candidate.id}-reference`]?.sending ||
-      candidate.reference_locked
-    }
-    className="px-3 py-1 text-xs rounded-[30px] bg-green-600 text-white hover:bg-green-700 disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    {buttonState[`${candidate.id}-reference`]?.sending
-      ? "Sending..."
-      : buttonState[`${candidate.id}-reference`]?.sent ||
-        candidate.reference_locked
-      ? "Reference Sent!"
-      : "Reference Check"}
-  </button>
-
-  {/* ✅ Offer Check */}
-  <button
-    onClick={async () => {
-      setButton(candidate.id, "offer", true, false);
-      await callEdgeFunction(candidate.id, "offer", "passed");
-      setButton(candidate.id, "offer", false, true);
-    }}
-    disabled={buttonState[`${candidate.id}-offer`]?.sending}
-    className="px-3 py-1 text-xs rounded-[30px] bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    {buttonState[`${candidate.id}-offer`]?.sending
-      ? "Sending..."
-      : buttonState[`${candidate.id}-offer`]?.sent
-      ? "Offer Sent!"
-      : "Offer Check"}
-  </button>
-
-  {/* ✅ Onboarding Check */}
-  <button
-    onClick={async () => {
-      setButton(candidate.id, "onboarding", true, false);
-      await callEdgeFunction(candidate.id, "onboarding", "failed");
-      setButton(candidate.id, "onboarding", false, true);
-    }}
-    disabled={buttonState[`${candidate.id}-onboarding`]?.sending}
-    className="px-3 py-1 text-xs rounded-[30px] bg-purple-600 text-white hover:bg-purple-700 disabled:opacity-50 disabled:cursor-not-allowed"
-  >
-    {buttonState[`${candidate.id}-onboarding`]?.sending
-      ? "Sending..."
-      : buttonState[`${candidate.id}-onboarding`]?.sent
-      ? "Onboarding Sent!"
-      : "Onboarding Check"}
-  </button>
-</div>
-
-            </div>
-          ))}
+            return (
+              <CandidateCardNew
+                key={c.id}
+                variant="operational"
+                name={c.name}
+                score={score}
+                delta={delta}
+                role={c.role}
+                company={c.company}
+                years={c.years_experience}
+                highlights={c.highlights ?? []}
+                referenceCheckPassed={c.reference_status === "passed"}
+                transcriptLink={c.transcript_url ?? undefined}
+                profileImage={c.profile_image_url ?? undefined}
+                cvUrl={cvUrl}
+                loadingStates={{
+                  reference: buttonState[`${c.id}-reference`]?.sending,
+                  offer: buttonState[`${c.id}-offer`]?.sending,
+                  onboarding: buttonState[`${c.id}-onboarding`]?.sending,
+                }}
+                onReferenceCheck={async () => {
+                  setButton(c.id, "reference", true, false);
+                  await callEdgeFunction(c.id, "reference", "passed");
+                  setButton(c.id, "reference", false, true);
+                }}
+                onOfferCheck={async () => {
+                  setButton(c.id, "offer", true, false);
+                  await callEdgeFunction(c.id, "offer", "passed");
+                  setButton(c.id, "offer", false, true);
+                }}
+                onOnboardingCheck={async () => {
+                  setButton(c.id, "onboarding", true, false);
+                  await callEdgeFunction(c.id, "onboarding", "failed");
+                  setButton(c.id, "onboarding", false, true);
+                }}
+              />
+            );
+          })}
         </div>
       )}
     </div>

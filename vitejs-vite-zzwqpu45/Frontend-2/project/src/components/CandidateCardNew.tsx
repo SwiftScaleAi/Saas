@@ -1,20 +1,33 @@
 import React from "react";
 import "./CandidateCardNew.css";
 
+type Variant = "operational" | "highlight" | "ai";
+
 type CandidateCardProps = {
+  variant?: Variant;
   name: string;
   score: number;
-  delta?: number; // optional score delta
+  delta?: number;
   role: string;
   company: string;
   years: number;
   highlights: string[];
   referenceCheckPassed: boolean;
   transcriptLink?: string;
-  profileImage?: string; // optional profile picture
+  profileImage?: string;
+  cvUrl?: string;
+  onReferenceCheck?: () => void;
+  onOfferCheck?: () => void;
+  onOnboardingCheck?: () => void;
+  loadingStates?: {
+    reference?: boolean;
+    offer?: boolean;
+    onboarding?: boolean;
+  };
 };
 
 const CandidateCardNew: React.FC<CandidateCardProps> = ({
+  variant = "highlight",
   name,
   score,
   delta,
@@ -25,11 +38,14 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
   referenceCheckPassed,
   transcriptLink,
   profileImage,
+  cvUrl,
+  onReferenceCheck,
+  onOfferCheck,
+  onOnboardingCheck,
+  loadingStates = {},
 }) => {
   return (
-    <div className="candidate-card-new">
-
-      {/* TOP ROW: Profile + Name + Score */}
+    <div className={`candidate-card-new ${variant === "ai" ? "ai-glow" : ""}`}>
       <div className="candidate-header">
         <div className="candidate-info">
           <img
@@ -44,29 +60,26 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
             </p>
           </div>
         </div>
-
         <div className="candidate-score">
-          <span className="score-number">{score}</span>
-
-          {/* Delta only if provided and non-zero */}
-          {delta !== undefined && delta !== 0 && (
-            <span className={`score-delta ${delta > 0 ? "up" : "down"}`}>
-              {delta > 0 ? `+${delta} ↑` : `${delta} ↓`}
-            </span>
-          )}
+          <span className="score-number">
+            {score}
+            {delta !== undefined && delta !== 0 && (
+              <sup className={`score-delta ${delta > 0 ? "up" : "down"}`}>
+                {delta > 0 ? `+${delta}` : `${delta}`}
+              </sup>
+            )}
+          </span>
         </div>
       </div>
 
-      {/* BULLET POINTS */}
       <ul className="candidate-highlights">
-        {highlights.map((point, index) => (
+        {highlights.slice(0, 2).map((point, index) => (
           <li key={index} className="highlight-item">
             • {point}
           </li>
         ))}
       </ul>
 
-      {/* BADGES + LINKS */}
       <div className="candidate-footer">
         {referenceCheckPassed && (
           <div className="reference-badge">
@@ -74,7 +87,6 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
             Reference Check Passed
           </div>
         )}
-
         {transcriptLink && (
           <a
             href={transcriptLink}
@@ -86,7 +98,45 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
             View Interview Transcript
           </a>
         )}
+        {cvUrl && (
+          <a
+            href={cvUrl}
+            className="transcript-link"
+            target="_blank"
+            rel="noopener noreferrer"
+            download
+          >
+            <span className="transcript-icon">⬇️</span>
+            Download CV
+          </a>
+        )}
       </div>
+
+      {variant === "operational" && (
+        <div className="action-buttons">
+          <button
+            onClick={onReferenceCheck}
+            disabled={loadingStates.reference}
+            className="action-btn reference"
+          >
+            {loadingStates.reference ? "Sending..." : "Reference Check"}
+          </button>
+          <button
+            onClick={onOfferCheck}
+            disabled={loadingStates.offer}
+            className="action-btn offer"
+          >
+            {loadingStates.offer ? "Sending..." : "Offer Check"}
+          </button>
+          <button
+            onClick={onOnboardingCheck}
+            disabled={loadingStates.onboarding}
+            className="action-btn onboarding"
+          >
+            {loadingStates.onboarding ? "Sending..." : "Onboarding Check"}
+          </button>
+        </div>
+      )}
     </div>
   );
 };

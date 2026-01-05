@@ -104,13 +104,14 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
 
         {/* SCORE + DELTA */}
         <div className="relative">
-          <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-full border border-green-300">
-            {score}
-          </span>
+       <span className="inline-flex items-center px-3 py-1 bg-green-100 text-green-700 text-sm font-semibold rounded-md border-green-300">
+  {score}
+</span>
+
 
           {delta !== undefined && delta !== 0 && (
             <span
-              className={`absolute -top-2 -right-1 text-xs font-semibold flex items-center ${
+              className={`absolute -top-2 -right-3 text-xs font-semibold flex items-center ${
                 delta > 0 ? "text-green-600" : "text-red-600"
               }`}
             >

@@ -1,4 +1,6 @@
-import { supabase } from "@/lib/supabase";
+//test edit
+
+import { supabase } from "../lib/supabase";
 
 export type TimelineEvent = {
   id?: string;

@@ -1,6 +1,6 @@
-import { supabase } from "@/lib/supabase";
-import { STAGES, Stage, ALLOWED_TRANSITIONS, TERMINAL_STAGES } from "@/lib/stages";
-import type { Candidate } from "@/lib/types";
+import { supabase } from "../lib/supabase";
+import { STAGES, Stage, ALLOWED_TRANSITIONS, TERMINAL_STAGES } from "../lib/stages";
+import type { Candidate } from "../lib/types";
 
 import { addTimelineEvent } from "./timelineEngine";
 import { logAudit } from "./auditEngine";

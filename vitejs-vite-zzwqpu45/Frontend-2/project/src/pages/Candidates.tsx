@@ -3,6 +3,7 @@ import { supabase } from "../lib/supabase";
 import { callEdgeFunction } from "../utils/edgeFunctions";
 import CandidateCardNew from "../components/CandidateCardNew";
 import { useNavigate } from "react-router-dom";
+import { CandidateDetailDrawer } from "../components/CandidateDetail/CandidateDetailDrawer";
 
 interface Candidate {
   id: string;
@@ -36,6 +37,20 @@ export default function Candidates() {
   >({});
 
   const navigate = useNavigate();
+
+  // Drawer state
+  const [selectedCandidate, setSelectedCandidate] = useState<Candidate | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+
+  function openCandidate(candidate: Candidate) {
+    setSelectedCandidate(candidate);
+    setDrawerOpen(true);
+  }
+
+  function closeDrawer() {
+    setDrawerOpen(false);
+    setSelectedCandidate(null);
+  }
 
   useEffect(() => {
     fetchData();
@@ -102,7 +117,7 @@ export default function Candidates() {
   }
 
   return (
-    <div>
+    <div className="relative">
       <div className="mb-6">
         <h1 className="text-3xl font-bold text-gray-900">Candidate Pipeline</h1>
         <p className="mt-2 text-gray-600">Review and manage all candidates</p>
@@ -127,35 +142,47 @@ export default function Candidates() {
               : undefined;
 
             return (
-              <CandidateCardNew
+              <div
                 key={c.id}
-                variant="operational"
-                name={c.name}
-                score={score}
-                delta={delta}
-                role={c.role}
-                company={c.company}
-                years={c.years_experience}
-                highlights={c.highlights ?? []}
-                referenceCheckPassed={c.reference_status === "passed"}
-                transcriptLink={c.transcript_url ?? undefined}
-                profileImage={c.profile_image_url ?? undefined}
-                cvUrl={cvUrl}
-                offerStatus={c.offer_status}
-                loadingStates={{
-                  reference: buttonState[`${c.id}-reference`]?.sending,
-                }}
-                onReferenceCheck={async () => {
-                  setButton(c.id, "reference", true, false);
-                  await callEdgeFunction(c.id, "reference", "passed");
-                  setButton(c.id, "reference", false, true);
-                }}
-                onDraftOffer={() => handleDraftOffer(c)}
-              />
+                onClick={() => openCandidate(c)}
+                className="cursor-pointer"
+              >
+                <CandidateCardNew
+                  variant="operational"
+                  name={c.name}
+                  score={score}
+                  delta={delta}
+                  role={c.role}
+                  company={c.company}
+                  years={c.years_experience}
+                  highlights={c.highlights ?? []}
+                  referenceCheckPassed={c.reference_status === "passed"}
+                  transcriptLink={c.transcript_url ?? undefined}
+                  profileImage={c.profile_image_url ?? undefined}
+                  cvUrl={cvUrl}
+                  offerStatus={c.offer_status}
+                  loadingStates={{
+                    reference: buttonState[`${c.id}-reference`]?.sending,
+                  }}
+                  onReferenceCheck={async () => {
+                    setButton(c.id, "reference", true, false);
+                    await callEdgeFunction(c.id, "reference", "passed");
+                    setButton(c.id, "reference", false, true);
+                  }}
+                  onDraftOffer={() => handleDraftOffer(c)}
+                />
+              </div>
             );
           })}
         </div>
       )}
+
+      {/* Right-side Drawer */}
+      <CandidateDetailDrawer
+        candidate={selectedCandidate}
+        open={drawerOpen}
+        onClose={closeDrawer}
+      />
     </div>
   );
 }

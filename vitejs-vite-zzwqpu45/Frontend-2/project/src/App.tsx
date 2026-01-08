@@ -1,6 +1,9 @@
+import { useEffect } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import { DndContext } from '@dnd-kit/core';
+
 import { updateStage } from './engine/stageEngine';
+import { subscribeToCandidateRealtime } from './engine/realtime/candidatesChannel';
 
 import Navigation from './components/Navigation';
 
@@ -19,6 +22,13 @@ import OfferDraftPage from './pages/OfferDraftPage';
 import PipelineBoard from './pages/PipelineBoard';
 
 function App() {
+  // ⭐ REALTIME SUBSCRIPTION
+  useEffect(() => {
+    const channel = subscribeToCandidateRealtime();
+    return () => channel.unsubscribe();
+  }, []);
+
+  // ⭐ DRAG & DROP STAGE UPDATE
   async function handleDragEnd(event) {
     const { active, over } = event;
 

@@ -5,7 +5,7 @@ import { updateStage } from "../../engine/stageEngine";
 import { fetchNotes, createNote, Note } from "../../lib/api/notes";
 import { supabase } from "../../lib/supabase";
 
-// ⭐ OFFER ENGINE
+// OFFER ENGINE
 import {
   fetchOfferForCandidate,
   createOfferDraft,
@@ -20,13 +20,7 @@ interface CandidateDetailDrawerProps {
   onClose: () => void;
 }
 
-const STAGES = [
-  "applied",
-  "screening",
-  "interview",
-  "offer",
-  "offer_accepted",
-];
+const STAGES = ["applied", "screening", "interview", "offer", "offer_accepted"];
 
 export function CandidateDetailDrawer({
   candidate,
@@ -37,17 +31,9 @@ export function CandidateDetailDrawer({
   const [notes, setNotes] = useState<Note[]>([]);
   const [currentStage, setCurrentStage] = useState("");
 
-  // ⭐ Load the real stage from the candidate when the drawer opens
-  useEffect(() => {
-    if (candidate?.stage) {
-      setCurrentStage(candidate.stage);
-    }
-  }, [candidate]);
-
   const [activeTab, setActiveTab] = useState<
     "timeline" | "notes" | "files" | "offer"
   >("timeline");
-
 
   const [newNote, setNewNote] = useState("");
 
@@ -55,13 +41,6 @@ export function CandidateDetailDrawer({
   const [offer, setOffer] = useState<any | null>(null);
   const [offerLoading, setOfferLoading] = useState(false);
   const [offerSaving, setOfferSaving] = useState(false);
-
-  async function loadOffer(candidateId: string) {
-    setOfferLoading(true);
-    const data = await fetchOfferForCandidate(candidateId);
-    setOffer(data);
-    setOfferLoading(false);
-  }
 
   const notesEndRef = useRef<HTMLDivElement | null>(null);
 
@@ -71,6 +50,15 @@ export function CandidateDetailDrawer({
     }
   };
 
+  // Load offer
+  async function loadOffer(candidateId: string) {
+    setOfferLoading(true);
+    const data = await fetchOfferForCandidate(candidateId);
+    setOffer(data);
+    setOfferLoading(false);
+  }
+
+  // Load timeline + notes + fresh stage
   async function loadData(candidateId: string) {
     const events = await fetchTimelineForCandidate(candidateId);
     setTimeline(events);
@@ -78,50 +66,32 @@ export function CandidateDetailDrawer({
     const notesData = await fetchNotes(candidateId);
     setNotes(notesData);
 
-    // ⭐ NEW: fetch candidate again
-  const { data: freshCandidate } = await supabase
-    .from("candidates")
-    .select("stage")
-    .eq("id", candidateId)
-    .single();
+    const { data: freshCandidate } = await supabase
+      .from("candidates")
+      .select("stage")
+      .eq("id", candidateId)
+      .single();
 
-  if (freshCandidate?.stage) {
-    setCurrentStage(freshCandidate.stage);
-  }
+    if (freshCandidate?.stage) {
+      setCurrentStage(freshCandidate.stage);
+    }
 
     setTimeout(scrollNotesToBottom, 50);
   }
 
-  
-  // ⭐ Load timeline + notes + offer when drawer opens
- useEffect(() => {
-  if (!candidate?.id) return;
-
-  // ⭐ Always fetch fresh stage from DB when drawer opens
-  const fetchFreshStage = async () => {
-    const { data } = await supabase
-      .from("candidates")
-      .select("stage")
-      .eq("id", candidate.id)
-      .single();
-
-    if (data?.stage) {
-      setCurrentStage(data.stage);
-    }
-  };
-
-  fetchFreshStage();
-
-  loadData(candidate.id);
-  loadOffer(candidate.id);
-}, [candidate?.id]);
-
-
-  // ⭐ Realtime offer updates
+  // Load everything when drawer opens
   useEffect(() => {
     if (!candidate?.id) return;
 
-    const candidateId = candidate.id as string;
+    loadData(candidate.id);
+    loadOffer(candidate.id);
+  }, [candidate?.id]);
+
+  // Realtime offer updates
+  useEffect(() => {
+    if (!candidate?.id) return;
+
+    const candidateId = candidate.id;
 
     const channel = supabase
       .channel(`candidate_realtime_${candidateId}`)
@@ -133,9 +103,7 @@ export function CandidateDetailDrawer({
           table: "candidate_offers",
           filter: `candidate_id=eq.${candidateId}`,
         },
-        () => {
-          loadOffer(candidateId);
-        }
+        () => loadOffer(candidateId)
       )
       .subscribe();
 
@@ -144,14 +112,12 @@ export function CandidateDetailDrawer({
     };
   }, [candidate?.id]);
 
-  // ⭐ STOP HERE — JSX MUST NOT BE ABOVE THIS LINE
-
-
+  // Stage change handler
   async function handleStageChange(stage: string) {
     if (!candidate) return;
 
     setCurrentStage(stage);
-    await updateStage(candidate, stage);
+    await updateStage(candidate.id, stage);
 
     const events = await fetchTimelineForCandidate(candidate.id);
     setTimeline(events);
@@ -175,9 +141,11 @@ export function CandidateDetailDrawer({
 
   return (
     <div
-      className={`fixed top-0 right-0 h-full w-[420px] bg-white shadow-xl border-l border-gray-200 transform transition-transform duration-300 ease-out ${
-        open ? "translate-x-0" : "translate-x-full"
-      }`}
+      className={`
+        fixed top-0 right-0 h-full w-[420px] bg-white shadow-xl border-l border-gray-200
+        transform transition-transform duration-300 ease-out
+        ${open ? "translate-x-0" : "translate-x-full"}
+      `}
     >
       {/* Header */}
       <div className="p-4 border-b border-gray-200 flex justify-between items-center">
@@ -201,31 +169,20 @@ export function CandidateDetailDrawer({
             const active = currentStage === stage;
 
             return (
-<button
-  key={stage}
-  onClick={async () => {
-    if (!candidate) return;
-
-    // Update UI immediately
-    handleStageChange(stage);
-
-    try {
-      // Persist to DB
-      await updateStage(candidate.id, stage);
-    } catch (error) {
-      console.error("Stage update failed:", error);
-    }
-  }}
-  className={`px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-all ${
-    active
-      ? "bg-blue-600 text-white shadow-sm"
-      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
-  }`}
->
-  {stage.replace("_", " ")}
-</button>
-
-
+              <button
+                key={stage}
+                onClick={() => handleStageChange(stage)}
+                className={`
+                  px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-all
+                  ${
+                    active
+                      ? "bg-blue-600 text-white shadow-sm"
+                      : "bg-gray-100 text-gray-700 hover:bg-gray-200"
+                  }
+                `}
+              >
+                {stage.replace("_", " ")}
+              </button>
             );
           })}
         </div>
@@ -237,11 +194,14 @@ export function CandidateDetailDrawer({
           <button
             key={tab}
             onClick={() => setActiveTab(tab as any)}
-            className={`py-3 text-sm font-medium border-b-2 transition-all ${
-              activeTab === tab
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-gray-600 hover:text-gray-800"
-            }`}
+            className={`
+              py-3 text-sm font-medium border-b-2 transition-all
+              ${
+                activeTab === tab
+                  ? "border-blue-600 text-blue-600"
+                  : "border-transparent text-gray-600 hover:text-gray-800"
+              }
+            `}
           >
             {tab.charAt(0).toUpperCase() + tab.slice(1)}
           </button>
@@ -341,7 +301,7 @@ export function CandidateDetailDrawer({
           </div>
         )}
 
-        {/* ⭐ OFFER TAB — placed correctly */}
+        {/* OFFER TAB */}
         {activeTab === "offer" && (
           <div className="space-y-4">
             <h3 className="text-lg font-medium mb-2">Offer</h3>
@@ -495,4 +455,3 @@ export function CandidateDetailDrawer({
     </div>
   );
 }
-

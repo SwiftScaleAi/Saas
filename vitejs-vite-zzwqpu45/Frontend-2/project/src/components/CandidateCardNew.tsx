@@ -33,7 +33,10 @@ type CandidateCardProps = {
   offerStatus?: OfferStatus;
   candidateId?: string;
   onReferenceCheck?: () => void;
+
+  // ⭐ This now ALWAYS opens the drawer on the Offer tab
   onDraftOffer?: () => void;
+
   loadingStates?: {
     reference?: boolean;
   };
@@ -86,6 +89,13 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
     }
   };
 
+  // ⭐ NEW — Pipeline card NEVER sends the offer directly.
+  // It ONLY opens the drawer on the Offer tab.
+  const openOfferDrawer = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    onDraftOffer?.();
+  };
+
   const renderOfferStatus = () => {
     if (status === "accepted") {
       return (
@@ -94,6 +104,7 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
         </span>
       );
     }
+
     if (status === "rejected") {
       return (
         <span className="inline-flex items-center gap-1 px-3 py-1 bg-red-100 text-red-700 text-xs font-medium rounded-full border border-red-300">
@@ -101,6 +112,20 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
         </span>
       );
     }
+
+    // ⭐ If a draft exists, show "Send Offer" — but this opens the drawer.
+    if (status === "draft") {
+      return (
+        <button
+          onClick={openOfferDrawer}
+          className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded border border-blue-300 transition"
+        >
+          Send Offer
+        </button>
+      );
+    }
+
+    // ⭐ If already sent
     if (status === "sent" || status === "passed") {
       return (
         <span className="inline-flex items-center gap-1 px-3 py-1 bg-blue-100 text-blue-700 text-xs font-medium rounded-full border border-blue-300">
@@ -108,12 +133,11 @@ const CandidateCardNew: React.FC<CandidateCardProps> = ({
         </span>
       );
     }
+
+    // ⭐ Default: No draft exists → Draft Offer
     return (
       <button
-        onClick={(e) => {
-          e.stopPropagation();
-          onDraftOffer?.();
-        }}
+        onClick={openOfferDrawer}
         className="px-3 py-1 text-sm bg-blue-100 hover:bg-blue-200 text-blue-700 rounded border border-blue-300 transition"
       >
         Draft Offer

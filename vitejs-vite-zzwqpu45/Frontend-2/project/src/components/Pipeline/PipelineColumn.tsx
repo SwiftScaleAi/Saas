@@ -21,9 +21,8 @@ export default function PipelineColumn({
     <div
       ref={setDropRef}
       data-stage={stage}
-      className={`w-80 rounded-lg p-4 flex-shrink-0 border transition-all ${
-        isOver ? "bg-blue-50 border-blue-300 shadow-md" : "bg-gray-50 border-gray-200"
-      }`}
+      className={`w-80 rounded-lg p-4 flex-shrink-0 border transition-all ${isOver ? "bg-blue-50 border-blue-300 shadow-md" : "bg-gray-50 border-gray-200"
+        }`}
     >
       <h2 className="text-lg font-semibold mb-4 capitalize flex items-center justify-between">
         {stage}
@@ -79,12 +78,12 @@ function DraggableCandidate({
 
   const style = transform
     ? {
-        transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
-        zIndex: 50,
-        position: "relative",
-        opacity: isDragging ? 0.85 : 1,
-        transition: "transform 0.12s ease-out",
-      }
+      transform: `translate3d(${transform.x}px, ${transform.y}px, 0)`,
+      zIndex: 50,
+      position: "relative",
+      opacity: isDragging ? 0.85 : 1,
+      transition: "transform 0.12s ease-out",
+    }
     : { transition: "transform 0.12s ease-out" };
 
   return (
@@ -114,9 +113,9 @@ function DraggableCandidate({
             }
             delta={
               candidate.post_interview_score &&
-              candidate.pre_interview_score
+                candidate.pre_interview_score
                 ? candidate.post_interview_score -
-                  candidate.pre_interview_score
+                candidate.pre_interview_score
                 : undefined
             }
             highlights={candidate.highlights ?? []}
@@ -125,7 +124,14 @@ function DraggableCandidate({
             profileImage={candidate.profile_image_url ?? undefined}
             cvUrl={candidate.cv_file_path}
             offerStatus={candidate.offer_status}
+
+            // ⭐ NEW: This makes Draft Offer + Send Offer open the drawer on the Offer tab
+            onDraftOffer={() => {
+              onOpen(candidate); // opens the drawer
+              window.dispatchEvent(new CustomEvent("open-offer-tab"));
+            }}
           />
+
         </div>
       </div>
     </div>

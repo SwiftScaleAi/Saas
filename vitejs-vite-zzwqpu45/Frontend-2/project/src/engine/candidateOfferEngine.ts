@@ -79,7 +79,6 @@ export async function createOfferDraft(params: {
     return null;
   }
 
-  // Log timeline + audit
   await addTimelineEvent(candidateId, "offer_drafted", { offerId: data.id });
   await logAudit(candidateId, "offer_drafted", { offerId: data.id });
 
@@ -98,7 +97,6 @@ export async function updateOfferDraft(
     notes?: string | null;
   }
 ): Promise<CandidateOffer | null> {
-  // Fetch existing
   const { data: existing, error: fetchError } = await supabase
     .from("candidate_offers")
     .select("*")
@@ -141,7 +139,7 @@ export async function updateOfferDraft(
 }
 
 /* -------------------------------------------------------
- * SEND OFFER (DB UPDATE ONLY)
+ * SEND OFFER (correct stage + status update)
  * ----------------------------------------------------- */
 export async function sendOffer(offerId: string): Promise<CandidateOffer | null> {
   const { data: existing, error: fetchError } = await supabase
@@ -155,6 +153,7 @@ export async function sendOffer(offerId: string): Promise<CandidateOffer | null>
     return null;
   }
 
+  // 1. Update offer record
   const { data, error } = await supabase
     .from("candidate_offers")
     .update({
@@ -170,13 +169,13 @@ export async function sendOffer(offerId: string): Promise<CandidateOffer | null>
     return null;
   }
 
-  // Log timeline + audit
+  // 2. Log timeline + audit
   await addTimelineEvent(existing.candidate_id, "offer_sent", { offerId });
   await logAudit(existing.candidate_id, "offer_sent", { offerId });
 
-  // Update stage
+  // 3. Update candidate stage to "offer"
   const candidate = await getCandidate(existing.candidate_id);
-  await updateStage(candidate, "offer_sent");
+  await updateStage(candidate, "offer");
 
   return data as CandidateOffer;
 }
@@ -234,7 +233,6 @@ export async function updateOfferStatus(params: {
     return null;
   }
 
-  // Timeline + audit
   await addTimelineEvent(existing.candidate_id, "offer_status_changed", {
     offerId,
     status,

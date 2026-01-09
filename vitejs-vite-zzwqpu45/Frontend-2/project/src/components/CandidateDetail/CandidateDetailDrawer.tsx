@@ -195,6 +195,14 @@ export function CandidateDetailDrawer({
     };
   }, [candidate?.id]);
 
+  // ⭐ NEW: Listen for "open-offer-tab" events from Pipeline
+  useEffect(() => {
+    const handler = () => setActiveTab("offer");
+    window.addEventListener("open-offer-tab", handler);
+    return () => window.removeEventListener("open-offer-tab", handler);
+  }, []);
+
+
   // ⭐ FIX: Sync highlight when candidate.stage changes
   useEffect(() => {
     if (candidate?.stage) {
@@ -204,7 +212,7 @@ export function CandidateDetailDrawer({
 
   const cvUrl = candidate?.cv_file_path
     ? supabase.storage.from("cvs").getPublicUrl(candidate.cv_file_path).data
-        .publicUrl
+      .publicUrl
     : null;
 
   return (
@@ -249,12 +257,11 @@ export function CandidateDetailDrawer({
                 }}
                 className={`
                   px-3 py-1.5 rounded-full text-sm whitespace-nowrap transition-all
-                  ${
-                    active
-                      ? isRejected
-                        ? "bg-red-600 text-white shadow-sm"
-                        : "bg-blue-600 text-white shadow-sm"
-                      : isRejected
+                  ${active
+                    ? isRejected
+                      ? "bg-red-600 text-white shadow-sm"
+                      : "bg-blue-600 text-white shadow-sm"
+                    : isRejected
                       ? "bg-red-50 text-red-700 hover:bg-red-100"
                       : "bg-gray-100 text-gray-700 hover:bg-gray-200"
                   }
@@ -275,10 +282,9 @@ export function CandidateDetailDrawer({
             onClick={() => setActiveTab(tab as any)}
             className={`
               py-3 text-sm font-medium border-b-2 transition-all
-              ${
-                activeTab === tab
-                  ? "border-blue-600 text-blue-600"
-                  : "border-transparent text-gray-600 hover:text-gray-800"
+              ${activeTab === tab
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-gray-600 hover:text-gray-800"
               }
             `}
           >
@@ -568,10 +574,9 @@ export function CandidateDetailDrawer({
                     }}
                     className={`
                       w-full py-2 rounded-lg text-sm font-medium transition
-                      ${
-                        exportSuccess
-                          ? "bg-green-600 text-white"
-                          : "bg-purple-600 text-white hover:bg-purple-700"
+                      ${exportSuccess
+                        ? "bg-green-600 text-white"
+                        : "bg-purple-600 text-white hover:bg-purple-700"
                       }
                     `}
                   >

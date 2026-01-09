@@ -1,10 +1,12 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Timeline } from "../Timeline/Timeline";
 import { fetchTimelineForCandidate } from "../../lib/api/timeline";
-import { updateStage } from "../../engine/stageEngine";
+import { updateStage } from "../../engine/updateStage";
 import { fetchNotes, createNote, Note } from "../../lib/api/notes";
 import { supabase } from "../../lib/supabase";
-import { exportOfferToPdf } from "../../engine/offerPdfEngine";
+import { generateOfferPdf } from "../../engine/offerPdfEngine";
+
+
 
 // OFFER ENGINE
 import {
@@ -562,7 +564,7 @@ export function CandidateDetailDrawer({
                       setExporting(true);
 
                       try {
-                        await exportOfferToPdf(candidate.id);
+                        await generateOfferPdf(candidate.id);   // ⭐ updated function name
                         setExportSuccess(true);
 
                         setTimeout(() => {
@@ -572,6 +574,7 @@ export function CandidateDetailDrawer({
                         setExporting(false);
                       }
                     }}
+
                     className={`
                       w-full py-2 rounded-lg text-sm font-medium transition
                       ${exportSuccess

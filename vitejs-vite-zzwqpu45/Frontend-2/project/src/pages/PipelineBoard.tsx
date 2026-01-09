@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { DndContext, DragEndEvent, DragMoveEvent } from "@dnd-kit/core";
 import { supabase } from "../lib/supabase";
-import { STAGES } from "../lib/stages";
+import { STAGES } from "../../../../../src/agents/lib/stages";
 import PipelineColumn from "../components/Pipeline/PipelineColumn";
 import { CandidateDetailDrawer } from "../components/CandidateDetail/CandidateDetailDrawer";
 import { useCandidateStore } from "../stores/candidateStore";

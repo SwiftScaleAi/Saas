@@ -2,8 +2,8 @@ import React, { useState } from "react";
 import "./CandidateCardNew.css";
 import { CheckCircle, FileText, ArrowUp, ArrowDown } from "lucide-react";
 
-import { advanceStage } from "../engine/stageActions";
-import { rejectCandidate } from "../engine/rejectionEngine";
+import { advanceStage } from "../engine/advanceStage";
+import { rejectCandidate } from "../engine/rejectCandidate";
 import { useCandidateStore } from "../stores/candidateStore";
 
 type Variant = "operational" | "highlight" | "ai";

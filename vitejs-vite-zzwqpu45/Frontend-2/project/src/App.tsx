@@ -1,35 +1,32 @@
-import { useEffect } from 'react';
-import { Routes, Route } from 'react-router-dom';
-import { DndContext } from '@dnd-kit/core';
+import { useEffect } from "react";
+import { Routes, Route } from "react-router-dom";
+import { DndContext } from "@dnd-kit/core";
 
-import { updateStage } from './engine/stageEngine';
-import { subscribeToCandidateRealtime } from './engine/realtime/candidatesChannel';
+import { updateStage } from "./engine/updateStage";
+// import { subscribeToCandidateRealtime } from "./engine/realtime/candidatesChannel"; // temporarily disabled
 
-import Navigation from './components/Navigation';
+import Navigation from "./components/Navigation";
 
-import Dashboard from './pages/Dashboard';
-import AddJob from './pages/AddJob';
-import Jobs from './pages/Jobs';
-import Candidates from './pages/Candidates';
-import Offers from './pages/Offers';
-import Onboarding from './pages/Onboarding';
-import KnowledgeUpload from './pages/knowledgeupload';
+import Dashboard from "./pages/Dashboard";
+import AddJob from "./pages/AddJob";
+import Jobs from "./pages/Jobs";
+import Candidates from "./pages/Candidates";
+import Offers from "./pages/Offers";
+import Onboarding from "./pages/Onboarding";
+import KnowledgeUpload from "./pages/knowledgeupload";
 
-// ⭐ NEW: Draft Offer Page
-import OfferDraftPage from './pages/OfferDraftPage';
-
-// ⭐ NEW: Pipeline Board Page
-import PipelineBoard from './pages/PipelineBoard';
+import OfferDraftPage from "./pages/OfferDraftPage";
+import PipelineBoard from "./pages/PipelineBoard";
 
 function App() {
-  // ⭐ REALTIME SUBSCRIPTION
+  // ⭐ REALTIME SUBSCRIPTION (disabled until frontend version is restored)
   useEffect(() => {
-    const channel = subscribeToCandidateRealtime();
-    return () => channel.unsubscribe();
+    // const channel = subscribeToCandidateRealtime();
+    // return () => channel.unsubscribe();
   }, []);
 
   // ⭐ DRAG & DROP STAGE UPDATE
-  async function handleDragEnd(event) {
+  async function handleDragEnd(event: any) {
     const { active, over } = event;
 
     if (!over) return; // dropped outside any column

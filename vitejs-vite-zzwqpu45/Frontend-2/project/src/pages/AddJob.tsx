@@ -1,8 +1,19 @@
 import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "../lib/supabase";
-import { postToJobBoards } from "../agents/agents/jobPoster/jobPoster";
-import { ingestCv } from "../agents/agents/cvingester/cvingester";
+
+// ❌ Backend agents removed — frontend cannot import them
+// import { postToJobBoards } from "../agents/agents/jobPoster/jobPoster";
+// import { ingestCv } from "../agents/agents/cvingester/cvingester";
+
+// ⭐ Temporary frontend-safe placeholders
+async function postToJobBoards(job: any) {
+  console.warn("postToJobBoards() is not implemented in the frontend yet.", job);
+}
+
+async function ingestCv(jobId: string, cv: any) {
+  console.warn("ingestCv() is not implemented in the frontend yet.", jobId, cv);
+}
 
 export default function AddJob() {
   const navigate = useNavigate();
@@ -40,14 +51,14 @@ export default function AddJob() {
           status,
         });
 
-        // Simulate CV ingestion (runs all agents: parse, standardize, enrich, compliance, score)
+        // Simulated CV ingestion
         await ingestCv(jobId, { name: "Jane Doe", role: "Software Engineer" });
         await ingestCv(jobId, { name: "John Smith", role: "Frontend Developer" });
 
         console.log("Automation pipeline triggered: job posted + CVs ingested.");
       }
 
-      // ✅ Navigate back to jobs list after success
+      // Navigate back to jobs list after success
       navigate("/jobs");
     } catch (error) {
       console.error("Error creating job:", error);

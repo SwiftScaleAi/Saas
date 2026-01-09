@@ -17,27 +17,38 @@ export async function updateStage(candidate: Candidate, newStage: Stage) {
 
   // Validate new stage exists
   if (!STAGES.includes(newStage)) {
+    console.error("❌ Invalid stage:", newStage);
     throw new Error(`Invalid stage: ${newStage}`);
   }
 
   // Prevent changes from terminal states
   if (TERMINAL_STAGES.includes(oldStage)) {
+    console.error("❌ Cannot change from terminal stage:", oldStage);
     throw new Error(`Cannot change stage from terminal state: ${oldStage}`);
   }
 
   // Validate allowed transitions
-  const allowedNext = ALLOWED_TRANSITIONS[oldStage] || [];
+  const allowedNext = ALLOWED_TRANSITIONS[oldStage as Stage] || [];
+
   if (!allowedNext.includes(newStage)) {
+    console.error(`❌ Invalid transition from ${oldStage} to ${newStage}`);
     throw new Error(`Invalid transition from ${oldStage} to ${newStage}`);
   }
 
-  // Update DB
-  const { error: updateError } = await supabase
+  // Update DB and return updated candidate
+  const { data: updatedCandidate, error: updateError } = await supabase
     .from("candidates")
     .update({ stage: newStage })
-    .eq("id", candidate.id);
+    .eq("id", candidate.id)
+    .select()
+    .single();
 
-  if (updateError) throw updateError;
+  if (updateError) {
+    console.error("❌ Stage update failed:", updateError);
+    throw updateError;
+  } else {
+    console.log(`✅ Stage updated: ${candidate.name} → ${newStage}`);
+  }
 
   // Timeline event
   await addTimelineEvent(candidate.id, "stage_change", {
@@ -61,5 +72,6 @@ export async function updateStage(candidate: Candidate, newStage: Stage) {
     await triggerOnboardingForCandidate(candidate.id);
   }
 
-  return { oldStage, newStage };
+  // Return updated candidate so UI + board can sync
+  return { updatedCandidate };
 }

@@ -2,8 +2,9 @@ import React from "react";
 
 type TimelineEvent = {
   id?: string;
-  type: string;
-  payload: any;
+  type?: string; // make optional to avoid crashes
+  message?: string | null;
+  metadata?: any;
   created_at?: string;
 };
 
@@ -31,13 +32,22 @@ export function Timeline({ events }: TimelineProps) {
             {new Date(event.created_at || "").toLocaleString()}
           </div>
 
+          {/* Safe type formatting */}
           <div className="font-medium text-gray-800 capitalize">
-            {event.type.replace("_", " ")}
+            {(event.type ?? "event").replace(/_/g, " ")}
           </div>
 
-          {event.payload && (
+          {/* Show message if present */}
+          {event.message && (
+            <div className="text-sm text-gray-700 mt-1">
+              {event.message}
+            </div>
+          )}
+
+          {/* Show metadata if present */}
+          {event.metadata && (
             <pre className="text-xs bg-gray-100 p-2 rounded mt-1 text-gray-700">
-              {JSON.stringify(event.payload, null, 2)}
+              {JSON.stringify(event.metadata, null, 2)}
             </pre>
           )}
         </div>

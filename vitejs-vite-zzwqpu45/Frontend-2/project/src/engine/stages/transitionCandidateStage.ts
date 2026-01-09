@@ -1,7 +1,6 @@
 import { supabase } from "../../lib/supabase";
 import { useCandidateStore } from "../../stores/candidateStore";
-import { addTimelineEvent } from "../../lib/api/timeline";
-import { triggerAutomations } from "../automationEngine";
+import { addTimelineEvent } from "../../engine/timelineEngine";
 
 type Candidate = {
   id: string;
@@ -21,14 +20,14 @@ export async function transitionCandidateStage(
   options: TransitionOptions = {}
 ): Promise<Candidate | null> {
   const { id: candidateId, stage: fromStage } = candidate;
-  const { reason, triggerAutomations: shouldTrigger = true } = options;
+  const { reason } = options;
 
   const store = useCandidateStore.getState();
 
   // ⭐ Mark candidate as loading
   store.setLoadingState(candidateId, true);
 
-  // ⭐ Optimistic UI update (unchanged)
+  // ⭐ Optimistic UI update
   const optimistic = { ...candidate, stage: toStage };
   store.updateCandidate(candidateId, optimistic);
 
@@ -54,26 +53,23 @@ export async function transitionCandidateStage(
     return null;
   }
 
-  // ⭐ Timeline event (unchanged)
-  await addTimelineEvent({
-    candidate_id: candidateId,
-    type: "stage_transition",
-    payload: {
+  // ⭐ Timeline event (updated to match new API)
+  await addTimelineEvent(
+    candidateId,
+    "stage_transition",
+    {
       from: fromStage,
       to: toStage,
       reason,
-    },
-  });
+    }
+  );
 
-  // ⭐ Trigger automations (unchanged)
-  if (shouldTrigger) {
-    await triggerAutomations({
-      candidate_id: candidateId,
-      stage: toStage,
-    });
-  }
+  // ⭐ (Optional) Automations removed — no exported function
+  // if (options.triggerAutomations) {
+  //   await triggerAutomations({ candidate_id: candidateId, stage: toStage });
+  // }
 
-  // ⭐ Use new safer merge/insert method
+  // ⭐ Merge updated candidate into store
   store.replaceOrInsertCandidate(data);
 
   return data;

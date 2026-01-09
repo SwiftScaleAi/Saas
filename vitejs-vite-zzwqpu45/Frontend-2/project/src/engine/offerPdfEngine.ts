@@ -2,7 +2,6 @@
 import { jsPDF } from "jspdf";
 import { supabase } from "../lib/supabase";
 import { fetchOfferForCandidate } from "./candidateOfferEngine";
-import { fetchTimelineForCandidate } from "../lib/api/timeline";
 import { syncCandidate } from "./sync/syncCandidate";
 import { useCandidateStore } from "../stores/candidateStore";
 
@@ -114,7 +113,7 @@ export async function exportOfferToPdf(candidateId: string) {
     y += contentLines.length * 5 + 8;
   }
 
-  // Internal notes (optional)
+  // Internal notes
   if (offer.notes) {
     doc.setFontSize(10);
     doc.text("Internal Notes:", 20, y);
@@ -170,17 +169,18 @@ export async function exportOfferToPdf(candidateId: string) {
 
   const pdfUrl = publicUrlData.publicUrl;
 
-  // 6) Optionally: add to candidate record (e.g. offer_pdf_url)
+  // 6) Save PDF URL to candidate
   await supabase
     .from("candidates")
     .update({ offer_pdf_url: pdfUrl })
     .eq("id", candidateId);
 
-  // 7) Optionally: add timeline event
+  // 7) Add timeline event (correct schema)
   await supabase.from("candidate_events").insert({
     candidate_id: candidateId,
     event_type: "offer_pdf_exported",
-    metadata: { url: pdfUrl },
+    meta: { url: pdfUrl }, // FIXED
+    source: "system",
   });
 
   // 8) Sync store

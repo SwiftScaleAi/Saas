@@ -1,35 +1,39 @@
-//test edit
-
 import { supabase } from "../lib/supabase";
 
 export type TimelineEvent = {
   id?: string;
   candidate_id: string;
-  type: string;
-  payload: any;
+  event_type: string;
+  meta?: any;
   created_at?: string;
 };
 
 /**
  * Adds a timeline event for a candidate.
- * This is called by stage changes, offer flow, rejection flow, scoring, onboarding, etc.
  */
 export async function addTimelineEvent(
   candidateId: string,
   type: string,
   payload: any = {}
 ) {
-  const event: TimelineEvent = {
+  // Normalize metadata (must be a plain object)
+  const metadata =
+    payload && typeof payload === "object" && !Array.isArray(payload)
+      ? { ...payload }
+      : {};
+
+  const { error } = await supabase.from("candidate_events").insert({
     candidate_id: candidateId,
-    type,
-    payload,
-  };
+    event_type: type,   // correct column
+    meta: metadata,     // correct column
+    // source defaults to 'system'
+    // created_at defaults to now()
+  });
 
-  const { error } = await supabase.from("timeline").insert(event);
-
-  if (error) throw error;
-
-  return event;
+  if (error) {
+    console.error("❌ Failed to insert timeline event:", error);
+    throw error;
+  }
 }
 
 /**
@@ -37,12 +41,15 @@ export async function addTimelineEvent(
  */
 export async function getTimeline(candidateId: string) {
   const { data, error } = await supabase
-    .from("timeline")
+    .from("candidate_events")
     .select("*")
     .eq("candidate_id", candidateId)
     .order("created_at", { ascending: false });
 
-  if (error) throw error;
+  if (error) {
+    console.error("❌ Failed to fetch timeline:", error);
+    throw error;
+  }
 
   return data as TimelineEvent[];
 }

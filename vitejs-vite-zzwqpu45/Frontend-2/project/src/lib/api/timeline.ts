@@ -28,22 +28,24 @@ export async function fetchTimelineForCandidate(
 
 /**
  * Writes a timeline event for a candidate.
+ * (Safe wrapper — uses correct schema)
  */
 export async function addTimelineEvent(event: {
   candidate_id: string;
   type: string;
-  message: string;
-  metadata?: Record<string, any>;
+  meta?: Record<string, any>;
 }): Promise<TimelineEvent | null> {
   try {
+    const payload = {
+      candidate_id: event.candidate_id,
+      event_type: event.type,   // ✔ correct column
+      meta: event.meta ?? {},   // ✔ correct column
+      source: "system",         // ✔ optional but valid
+    };
+
     const { data, error } = await supabase
-      .from("timeline")
-      .insert({
-        candidate_id: event.candidate_id,
-        type: event.type,
-        message: event.message,
-        metadata: event.metadata ?? {},
-      })
+      .from("candidate_events")
+      .insert(payload)
       .select()
       .single();
 
